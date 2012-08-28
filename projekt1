@@ -1,0 +1,76 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+from numpy import *
+from matplotlib import pyplot
+import sys
+
+f=0.5
+l=5.0
+
+steplength=0 #podawany przez usera 
+  
+class Atom(object):
+  
+  def __init__(self, coords):
+    self.coords=coords
+    self.velocity=array([0,0,0])
+    self.force=array([0,0,0])
+    self.prevCoords=coords
+    self.prevVelocity=array([0,0,0])
+    self.prevForce=array([0,0,0])
+    self.mass=1.0
+    self.energy=0.0
+   
+  def KinE(self):
+    energy=0.5*self.mass*linalg.norm(self.velocity)**2
+    return energy
+  
+  def zeroOutPotE(self):
+    self.energy=0.0
+    
+class TheSystem(object):
+  
+  def __init__(self, nOfAtoms):
+    Atoms=[]
+    lastCoords=array([0,0,0])
+    for i in xrange(nOfAtoms):
+      coords=lastCoords+array([1,0,0])
+      Atoms.append(Atom(coords))
+    self.atoms=Atoms
+
+  def zeroOutPotEnergies(self):
+    for atom in self.atoms:
+      atom.zeroOutPotE()
+   
+class SoftWalls(object):
+  
+  def singleForce(self, atom):
+    distance=linalg.norm(atom.coords)
+    if (distance>=l):
+      atom.force=f*(l-distance)*atom.coords/distance
+    else:
+      atom.force=array([0,0,0])
+     
+  def singleEnergy(self, atom):
+    distance=linalg.norm(atom.coords)
+    if (distance>=l):
+      atom.energy=0.5*f*(l-distance)**2    
+    else:
+      atom.energy=0.0
+      
+class Verlet(object):
+  
+  def step(self, atom, steplength):
+    actualCoords=atom.coords
+    atom.prevVelocity=atom.velocity
+    atom.coords=2*actualCoords-atom.prevCoords+(atom.force/atom.mass)*steplength**2
+    atom.velocity=(atom.coords-atom.prevCoords)/steplength
+    atom.prevCoords=actualCoords
+
+def main():
+  print sys.argv
+  
+if __name__=='__main__':
+  main()
+  
+ 
